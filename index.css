@@ -1,0 +1,150 @@
+/* Import Tailwind CSS base styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define CSS variables for shadcn/ui-like theme */
+@layer base {
+  :root {
+    --background: 0 0% 97%; /* #F7F7F7 */
+    --foreground: 215 19% 25%; /* #2D3748 */
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 215 19% 25%; /* #2D3748 */
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 215 19% 25%; /* #2D3748 */
+    --primary: 178 44% 47%; /* #38B2AC */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF */
+    --secondary: 179 49% 33%; /* #2C7A7B */
+    --secondary-foreground: 0 0% 100%; /* #FFFFFF */
+    --muted: 210 22% 94%; /* #EDF2F7 */
+    --muted-foreground: 215 14% 53%; /* #718096 */
+    --accent: 168 64% 86%; /* #B2F5EA */
+    --accent-foreground: 215 19% 25%; /* #2D3748 */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 20% 91%; /* #E2E8F0 */
+    --input: 215 20% 91%; /* #E2E8F0 */
+    --ring: 178 44% 47%; /* #38B2AC */
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar and styles for preview */
+.code-preview {
+    background-color: #070f44;
+    color: #f8f8f2;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.code-preview::-webkit-scrollbar {
+    width: 8px;
+}
+
+.code-preview::-webkit-scrollbar-track {
+    background: #070f44;
+}
+
+.code-preview::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+}
+
+.code-preview::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
+}
+
+/* JSON Syntax Highlighting */
+.json-key { color: #82aaff; }
+.json-string { color: #c3e88d; }
+.json-number { color: #f78c6c; }
+.json-boolean { color: #c792ea; }
+.json-null { color: #8f93a2; }
+
+
+.loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid hsl(var(--primary-foreground));
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+
+/* Drag and Drop Styles */
+.snippet-container {
+  position: relative;
+}
+
+.drop-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: hsl(var(--primary));
+  z-index: 10;
+  border-radius: 1px;
+}
+
+[draggable="true"] {
+    cursor: grab;
+}
+
+[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.dragging-item {
+    opacity: 0.5;
+    transform: scale(0.98);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body.dragging-active {
+    cursor: grabbing !important;
+    user-select: none;
+    -webkit-user-select: none;
+}
