@@ -45,6 +45,7 @@ const App = () => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragItemRef = useRef<number | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
     const output = snippets.map(snippet => {
@@ -113,6 +114,11 @@ const App = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
+  
+  const handleReset = () => {
+    setSnippets([]);
+    setShowResetConfirm(false);
+  };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
       dragItemRef.current = index;
@@ -152,6 +158,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+       {showResetConfirm && <ResetConfirmationDialog onConfirm={handleReset} onCancel={() => setShowResetConfirm(false)} />}
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <header className="text-center mb-8 pb-4 border-b">
           <h1 className="text-4xl font-bold tracking-tight">JSON Snippet Compiler</h1>
@@ -207,7 +214,10 @@ const App = () => {
                 <JsonHighlighter jsonString={jsonOutput} />
               </CardContent>
               <CardFooter>
-                 <Button onClick={handleDownload} className="w-full">Download JSON</Button>
+                <div className="w-full flex flex-col sm:flex-row gap-2">
+                    <Button onClick={() => setShowResetConfirm(true)} variant="outline" className="w-full">Reset</Button>
+                    <Button onClick={handleDownload} className="w-full">Download JSON</Button>
+                </div>
               </CardFooter>
             </Card>
           </div>
@@ -481,6 +491,24 @@ const SnippetSelector = ({ onAddSnippet, metaExists }: { onAddSnippet: (type: Sn
         <Button onClick={() => onAddSnippet('prayer')} variant="outline">Prayer</Button>
       </CardContent>
     </Card>
+);
+
+// --- Confirmation Dialog ---
+const ResetConfirmationDialog = ({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void; }) => (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" aria-modal="true" role="dialog" onClick={onCancel}>
+        <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <CardHeader>
+                <CardTitle>Confirm Reset</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">Are you sure you want to reset? All current snippets and content will be lost.</p>
+            </CardContent>
+            <CardFooter className="flex justify-end gap-2">
+                <Button variant="outline" onClick={onCancel}>Cancel</Button>
+                <Button variant="destructive" onClick={onConfirm}>Confirm Reset</Button>
+            </CardFooter>
+        </Card>
+    </div>
 );
 
 // --- Reusable UI Components (shadcn/ui inspired) ---
