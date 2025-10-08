@@ -28,6 +28,7 @@ type SnippetDataMap = {
   paragraph: { content: string };
   prayer: { title: string; text: string };
   lesson: { content: string };
+  subheading: { subtitle: string; content: string };
 };
 
 type SnippetType = keyof SnippetDataMap;
@@ -53,6 +54,7 @@ const App = () => {
             case 'paragraph': return { type: 'paragraph', content: snippet.data.content };
             case 'prayer': return { type: 'prayer', title: snippet.data.title, text: snippet.data.text };
             case 'lesson': return { type: 'lesson', content: snippet.data.content };
+            case 'subheading': return { type: 'Subheading', subtitle: snippet.data.subtitle, content: snippet.data.content };
             default: return null;
         }
     }).filter(Boolean);
@@ -69,6 +71,7 @@ const App = () => {
             paragraph: { content: '' },
             prayer: { title: 'Prayer', text: '' },
             lesson: { content: '' },
+            subheading: { subtitle: '', content: '' },
         } as SnippetDataMap)[type]
     };
     setSnippets(prev => type === 'meta' ? [newSnippet, ...prev] : [...prev, newSnippet]);
@@ -170,7 +173,8 @@ const App = () => {
                       verse: VerseSnippet,
                       paragraph: ParagraphSnippet,
                       prayer: PrayerSnippet,
-                      lesson: LessonSnippet
+                      lesson: LessonSnippet,
+                      subheading: SubheadingSnippet,
                 }[snippet.type];
 
                 return (
@@ -447,6 +451,22 @@ const LessonSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'lesson'>) 
     </SnippetCard>
 );
 
+const SubheadingSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'subheading'>) => (
+    <SnippetCard title="Subheading" snippetId={snippet.id} onDelete={onDelete}>
+        <div className="grid gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor={`subheading-subtitle-${snippet.id}`}>Subtitle</Label>
+                <Input id={`subheading-subtitle-${snippet.id}`} placeholder="Enter subheading text" value={snippet.data.subtitle} onChange={e => onUpdate(snippet.id, { ...snippet.data, subtitle: e.target.value })} />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor={`subheading-content-${snippet.id}`}>Content</Label>
+                <Textarea id={`subheading-content-${snippet.id}`} placeholder="Enter content for the subheading..." value={snippet.data.content} onChange={e => onUpdate(snippet.id, { ...snippet.data, content: e.target.value })} rows={5} />
+            </div>
+        </div>
+    </SnippetCard>
+);
+
+
 const SnippetSelector = ({ onAddSnippet, metaExists }: { onAddSnippet: (type: SnippetType) => void; metaExists: boolean; }) => (
     <Card>
       <CardHeader>
@@ -456,6 +476,7 @@ const SnippetSelector = ({ onAddSnippet, metaExists }: { onAddSnippet: (type: Sn
         <Button onClick={() => onAddSnippet('meta')} variant="outline" disabled={metaExists}>Meta Data</Button>
         <Button onClick={() => onAddSnippet('verse')} variant="outline">Verse</Button>
         <Button onClick={() => onAddSnippet('paragraph')} variant="outline">Paragraph</Button>
+        <Button onClick={() => onAddSnippet('subheading')} variant="outline">Subtitle</Button>
         <Button onClick={() => onAddSnippet('lesson')} variant="outline">Lesson</Button>
         <Button onClick={() => onAddSnippet('prayer')} variant="outline">Prayer</Button>
       </CardContent>
