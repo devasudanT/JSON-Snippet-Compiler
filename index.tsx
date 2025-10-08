@@ -66,7 +66,7 @@ const App = () => {
             meta: { title: '', language: 'English', date: '', youtubeUrl: '', pdfUrl: '', imageUrl: '' },
             verse: { reference: '', text: '' },
             paragraph: { content: '' },
-            prayer: { title: '', text: '' },
+            prayer: { title: 'Prayer', text: '' },
             lesson: { content: '' },
         } as SnippetDataMap)[type]
     };
@@ -420,7 +420,10 @@ const PrayerSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'prayer'>) 
         <div className="grid gap-4">
             <div className="grid gap-2">
                 <Label htmlFor={`prayer-title-${snippet.id}`}>Title</Label>
-                <Input id={`prayer-title-${snippet.id}`} placeholder="Prayer Title" value={snippet.data.title} onChange={e => onUpdate(snippet.id, { ...snippet.data, title: e.target.value })} />
+                <Select id={`prayer-title-${snippet.id}`} value={snippet.data.title} onChange={e => onUpdate(snippet.id, { ...snippet.data, title: e.target.value })}>
+                    <option value="Prayer">Prayer</option>
+                    <option value="ஜெபம்">ஜெபம்</option>
+                </Select>
             </div>
             <div className="grid gap-2">
                 <Label htmlFor={`prayer-text-${snippet.id}`}>Text</Label>
