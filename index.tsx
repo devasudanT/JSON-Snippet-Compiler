@@ -17,6 +17,7 @@ function cn(...inputs: ClassValue[]) {
 type SnippetDataMap = {
   meta: {
     title: string;
+    subtitle: string;
     language: 'English' | 'Tamil';
     date: string;
     youtubeUrl: string;
@@ -63,7 +64,7 @@ const App = () => {
         id: Date.now(),
         type,
         data: ({
-            meta: { title: '', language: 'English', date: '', youtubeUrl: '', pdfUrl: '', imageUrl: '' },
+            meta: { title: '', subtitle: '', language: 'English', date: '', youtubeUrl: '', pdfUrl: '', imageUrl: '' },
             verse: { reference: '', text: '' },
             paragraph: { content: '' },
             prayer: { title: 'Prayer', text: '' },
@@ -242,6 +243,10 @@ const MetaSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'meta'>) => (
             <div className="grid gap-2">
                 <Label htmlFor={`title-${snippet.id}`}>Title</Label>
                 <Input id={`title-${snippet.id}`} placeholder="Enter title text" value={snippet.data.title} onChange={e => onUpdate(snippet.id, { ...snippet.data, title: e.target.value })} />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor={`subtitle-${snippet.id}`}>Subtitle</Label>
+                <Input id={`subtitle-${snippet.id}`} placeholder="Enter subtitle text" value={snippet.data.subtitle} onChange={e => onUpdate(snippet.id, { ...snippet.data, subtitle: e.target.value })} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
