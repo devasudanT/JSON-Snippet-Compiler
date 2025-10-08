@@ -27,7 +27,7 @@ type SnippetDataMap = {
   verse: { reference: string; text: string };
   paragraph: { content: string };
   prayer: { title: string; text: string };
-  lesson: { content: string };
+  lesson: { title: string; content: string };
   subheading: { subtitle: string; content: string };
 };
 
@@ -54,7 +54,7 @@ const App = () => {
             case 'verse': return { type: 'verse', reference: snippet.data.reference, text: snippet.data.text };
             case 'paragraph': return { type: 'paragraph', content: snippet.data.content };
             case 'prayer': return { type: 'prayer', title: snippet.data.title, text: snippet.data.text };
-            case 'lesson': return { type: 'lesson', content: snippet.data.content };
+            case 'lesson': return { type: 'lesson', title: snippet.data.title, content: snippet.data.content };
             case 'subheading': return { type: 'Subheading', subtitle: snippet.data.subtitle, content: snippet.data.content };
             default: return null;
         }
@@ -71,7 +71,7 @@ const App = () => {
             verse: { reference: '', text: '' },
             paragraph: { content: '' },
             prayer: { title: 'Prayer', text: '' },
-            lesson: { content: '' },
+            lesson: { title: 'Our Lesson', content: '' },
             subheading: { subtitle: '', content: '' },
         } as SnippetDataMap)[type]
     };
@@ -454,9 +454,18 @@ const PrayerSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'prayer'>) 
 
 const LessonSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'lesson'>) => (
     <SnippetCard title="Lesson" snippetId={snippet.id} onDelete={onDelete}>
-        <div className="grid gap-2">
-            <Label htmlFor={`lesson-content-${snippet.id}`}>Content</Label>
-            <Textarea id={`lesson-content-${snippet.id}`} placeholder="Lesson content..." value={snippet.data.content} onChange={e => onUpdate(snippet.id, { ...snippet.data, content: e.target.value })} rows={5} />
+        <div className="grid gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor={`lesson-title-${snippet.id}`}>Title</Label>
+                <Select id={`lesson-title-${snippet.id}`} value={snippet.data.title} onChange={e => onUpdate(snippet.id, { ...snippet.data, title: e.target.value })}>
+                    <option value="Our Lesson">Our Lesson</option>
+                    <option value="நமக்கான பாடம்">நமக்கான பாடம்</option>
+                </Select>
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor={`lesson-content-${snippet.id}`}>Content</Label>
+                <Textarea id={`lesson-content-${snippet.id}`} placeholder="Lesson content..." value={snippet.data.content} onChange={e => onUpdate(snippet.id, { ...snippet.data, content: e.target.value })} rows={5} />
+            </div>
         </div>
     </SnippetCard>
 );
