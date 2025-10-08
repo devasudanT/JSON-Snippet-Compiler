@@ -268,6 +268,50 @@ const VerseSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'verse'>) =>
     </SnippetCard>
 );
 
+const htmlToMarkdown = (html: string): string => {
+    if (!html) return '';
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<body>${html}</body>`, 'text/html');
+
+    doc.querySelectorAll('script, style').forEach(el => el.remove());
+
+    function walk(node: Node): string {
+        if (node.nodeType === 3) return node.textContent || ''; // Text node
+        if (node.nodeType !== 1) return ''; // Not an element node
+
+        const element = node as Element;
+        const children = Array.from(element.childNodes).map(walk).join('');
+
+        switch (element.tagName) {
+            case 'STRONG':
+            case 'B':
+                return `**${children}**`;
+            case 'EM':
+            case 'I':
+                return `*${children}*`;
+            case 'P':
+                return `\n${children}\n`;
+            case 'LI':
+                return `- ${children.trim()}\n`;
+            case 'UL':
+            case 'OL':
+                return `${children.trim()}\n`;
+            case 'BR':
+                return '\n';
+            default:
+                return children;
+        }
+    }
+
+    let markdown = walk(doc.body);
+    
+    // Final cleanup
+    markdown = markdown.replace(/\n\s*\n/g, '\n\n').trim();
+
+    return markdown;
+};
+
 const ParagraphSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'paragraph'>) => {
     const [content, setContent] = useState(snippet.data.content);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -297,6 +341,40 @@ const ParagraphSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'paragra
         textarea.focus();
     };
 
+    const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        const clipboardData = e.clipboardData;
+        if (!clipboardData.types.includes('text/html')) {
+            return; // Let the default paste happen for plain text
+        }
+        
+        e.preventDefault();
+        
+        const html = clipboardData.getData('text/html');
+        const markdown = htmlToMarkdown(html);
+
+        if (markdown) {
+            const textarea = e.currentTarget;
+            const { selectionStart, selectionEnd } = textarea;
+
+            const currentContent = textarea.value;
+            const newContent =
+                currentContent.substring(0, selectionStart) +
+                markdown +
+                currentContent.substring(selectionEnd);
+            
+            setContent(newContent);
+            
+            // Wait for state to update and then set cursor position
+            setTimeout(() => {
+                if (textareaRef.current) {
+                    const newCursorPos = selectionStart + markdown.length;
+                    textareaRef.current.selectionStart = newCursorPos;
+                    textareaRef.current.selectionEnd = newCursorPos;
+                }
+            }, 0);
+        }
+    };
+
     return (
         <SnippetCard title="Paragraph" snippetId={snippet.id} onDelete={onDelete}>
             <div className="grid gap-2">
@@ -305,7 +383,14 @@ const ParagraphSnippet = ({ snippet, onUpdate, onDelete }: SnippetProps<'paragra
                     <Button variant="outline" size="sm" onClick={() => applyFormatting('italic')} aria-label="Italic" className="italic">I</Button>
                     <Button variant="outline" size="sm" onClick={() => applyFormatting('list')} aria-label="List">&bull;</Button>
                 </div>
-                <Textarea ref={textareaRef} placeholder="Paste your text here for manual formatting..." value={content} onChange={e => setContent(e.target.value)} rows={8} />
+                <Textarea 
+                  ref={textareaRef} 
+                  placeholder="Paste your text here for manual formatting..." 
+                  value={content} 
+                  onChange={e => setContent(e.target.value)} 
+                  onPaste={handlePaste}
+                  rows={8} 
+                />
             </div>
         </SnippetCard>
     );
