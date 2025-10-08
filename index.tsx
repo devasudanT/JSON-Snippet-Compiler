@@ -82,11 +82,30 @@ const App = () => {
   };
 
   const handleDownload = () => {
+    const metaSnippet = snippets.find(s => s.type === 'meta');
+    let filename = 'content.json';
+
+    if (metaSnippet && metaSnippet.type === 'meta' && metaSnippet.data.date) {
+        try {
+            // Date is in YYYY-MM-DD format from the input
+            const [year, month, day] = metaSnippet.data.date.split('-');
+            const formattedDate = `${day}-${month}-${year}`;
+            
+            // Language is either 'English' or 'Tamil'
+            const langCode = metaSnippet.data.language === 'Tamil' ? 'TA' : 'EN';
+            
+            filename = `${formattedDate}-${langCode}.json`;
+        } catch (error) {
+            console.error("Error formatting filename, using default 'content.json'.", error);
+            // If date is malformed or something goes wrong, filename remains 'content.json'
+        }
+    }
+
     const blob = new Blob([jsonOutput], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'content.json';
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
