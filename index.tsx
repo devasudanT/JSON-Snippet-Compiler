@@ -46,6 +46,7 @@ const App = () => {
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
     const dragItemRef = useRef<number | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     useEffect(() => {
@@ -114,6 +115,96 @@ const App = () => {
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
+    };
+
+    const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const jsonData = JSON.parse(text);
+
+            if (!Array.isArray(jsonData)) {
+                alert('Invalid JSON format. Expected an array of snippets.');
+                return;
+            }
+
+            const loadedSnippets: Snippet[] = jsonData.map((item: any, index: number) => {
+                if (!item.type || !item) {
+                    throw new Error(`Invalid snippet at index ${index}: missing type or data`);
+                }
+
+                const validTypes: SnippetType[] = ['meta', 'verse', 'paragraph', 'prayer', 'lesson', 'subheading'];
+                if (!validTypes.includes(item.type)) {
+                    throw new Error(`Invalid snippet type "${item.type}" at index ${index}`);
+                }
+
+                // Create snippet with generated ID
+                const snippet: Snippet = {
+                    id: Date.now() + index, // Ensure unique IDs
+                    type: item.type,
+                    data: {} as any
+                };
+
+                // Map the data based on type
+                switch (item.type) {
+                    case 'meta':
+                        snippet.data = {
+                            title: item.title || '',
+                            subtitle: item.subtitle || '',
+                            language: item.language || 'English',
+                            date: item.date || '',
+                            youtubeUrl: item.youtubeUrl || '',
+                            pdfUrl: item.pdfUrl || '',
+                            imageUrl: item.imageUrl || '',
+                            audioUrl: item.audioUrl || ''
+                        };
+                        break;
+                    case 'verse':
+                        snippet.data = {
+                            reference: item.reference || '',
+                            text: item.text || ''
+                        };
+                        break;
+                    case 'paragraph':
+                        snippet.data = {
+                            content: item.content || ''
+                        };
+                        break;
+                    case 'prayer':
+                        snippet.data = {
+                            title: item.title || 'Prayer',
+                            text: item.text || ''
+                        };
+                        break;
+                    case 'lesson':
+                        snippet.data = {
+                            title: item.title || 'Our Lesson',
+                            content: item.content || ''
+                        };
+                        break;
+                    case 'subheading':
+                        snippet.data = {
+                            subtitle: item.subtitle || '',
+                            content: item.content || ''
+                        };
+                        break;
+                }
+
+                return snippet;
+            });
+
+            setSnippets(loadedSnippets);
+            // Clear the file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+
+        } catch (error) {
+            console.error('Error uploading JSON:', error);
+            alert(`Error uploading JSON: ${error instanceof Error ? error.message : 'Invalid JSON file'}`);
+        }
     };
 
     const handleReset = () => {
@@ -216,8 +307,16 @@ const App = () => {
                             </CardContent>
                             <CardFooter>
                                 <div className="w-full flex flex-col sm:flex-row gap-2">
-                                    <Button onClick={() => setShowResetConfirm(true)} variant="outline" className="w-full">Reset</Button>
-                                    <Button onClick={handleDownload} className="w-full">Download JSON</Button>
+                                    <input
+                                        type="file"
+                                        accept=".json"
+                                        onChange={handleUpload}
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <Button onClick={() => setShowResetConfirm(true)} variant="outline" className="flex-1">Reset</Button>
+                                    <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="flex-1">Upload JSON</Button>
+                                    <Button onClick={handleDownload} className="flex-1">Download JSON</Button>
                                 </div>
                             </CardFooter>
                         </Card>
