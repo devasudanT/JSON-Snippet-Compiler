@@ -40,6 +40,8 @@ type Snippet<T extends SnippetType = SnippetType> = {
     data: SnippetDataMap[T];
 };
 
+const getPrayerTitleForLanguage = (language: 'English' | 'Tamil') => language === 'Tamil' ? 'ஜெபம்' : 'Prayer';
+
 const App = () => {
     const [snippets, setSnippets] = useState<Snippet[]>([]);
     const [jsonOutput, setJsonOutput] = useState('[]');
@@ -48,6 +50,25 @@ const App = () => {
     const dragItemRef = useRef<number | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+    const metaLanguage = snippets.find(snippet => snippet.type === 'meta')?.data.language;
+
+    useEffect(() => {
+        if (!metaLanguage) return;
+
+        const prayerTitle = getPrayerTitleForLanguage(metaLanguage);
+
+        setSnippets(prev => {
+            let updated = false;
+            const next = prev.map(snippet => {
+                if (snippet.type !== 'prayer') return snippet;
+                if (snippet.data.title === prayerTitle) return snippet;
+                updated = true;
+                return { ...snippet, data: { ...snippet.data, title: prayerTitle } };
+            });
+            return updated ? next : prev;
+        });
+    }, [metaLanguage]);
 
     useEffect(() => {
         const output = snippets.map(snippet => {
@@ -65,6 +86,7 @@ const App = () => {
     }, [snippets]);
 
     const handleAddSnippet = (type: SnippetType) => {
+        const existingMetaLanguage = snippets.find(snippet => snippet.type === 'meta')?.data.language || 'English';
         const newSnippet: Snippet = {
             id: Date.now(),
             type,
@@ -72,7 +94,7 @@ const App = () => {
                 meta: { title: '', subtitle: '', language: 'English', date: '', youtubeUrl: '', pdfUrl: '', imageUrl: '', audioUrl: '' },
                 verse: { reference: '', text: '' },
                 paragraph: { content: '' },
-                prayer: { title: 'Prayer', text: '' },
+                prayer: { title: getPrayerTitleForLanguage(existingMetaLanguage), text: '' },
                 lesson: { title: 'Our Lesson', content: '' },
                 subheading: { subtitle: '', content: '' },
             } as SnippetDataMap)[type]
